@@ -44,6 +44,15 @@ td {
 
     cursor: pointer;
 }
+td:active:not(.revealed) {
+    background-color: #ccc;
+}
+
+.revealed {
+    border: none;
+    background-color: #eee;
+    cursor: default;
+}
 
 .mainthemeColor {
     color: #97582b;
