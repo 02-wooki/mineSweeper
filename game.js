@@ -42,6 +42,18 @@ window.oncontextmenu=function() {
 
 // 지뢰 생성
 const generateMine = (initCol, initRow) => {
+
+    const initArea = [];
+    for(i = initCol - 1; i < initCol + 2; i++) {
+        for(j = initRow - 1; j < initRow + 2; j++) {
+            if (i >= 0 && i < colSize[difficulty]) {
+                if (j >= 0 && j < rowSize[difficulty]) {
+                    initArea.push([i, j]);
+                }
+            }
+        }
+    }
+
     for(i=0; i < mineSize[difficulty]; i++) {
         const newcol=Math.floor(Math.random() * colSize[difficulty]);
         const newrow=Math.floor(Math.random() * colSize[difficulty]);
@@ -50,8 +62,9 @@ const generateMine = (initCol, initRow) => {
             i--;
         else if (initCol === newcol && initRow === newrow)
             i--;
-        else
+        else {
             mines[newcol][newrow] = true;
+        }
     }
 
     console.log(mines);
@@ -71,10 +84,8 @@ const clickEvendHandler = (target) => {
         if(gameStarted === false) {
             gameStarted = true;
             generateMine(col, row);
-            target.target.classList.add('revealed');
-        } else {
-            reveal(target.target, col, row);
         }
+        reveal(target.target, col, row);
     } else if ((target.button === 2) || (target.which === 3)) {
         // 우클릭
     }
@@ -82,10 +93,17 @@ const clickEvendHandler = (target) => {
 
 // 지뢰 칸 열기
 const reveal = (target, col, row) => {
-    if (mines[col][row] === true) {
-        console.log('game over');
-    } else if (revealed[col][row] !== true) {
+    // 이미 열려있지 않은 칸에만 실행
+    if (target.classList.contains('revealed') === false) {
         target.classList.add('revealed');
+        if (mines[col][row] === true) {
+            // 지뢰 칸을 엶
+            target.style.backgroundImage = 'url("./src/bomb-solid.svg")'
+            console.log('game over');
+        } else if (revealed[col][row] !== true && flagged[col][row] === false) {
+            // 정상적으로 열림
+            
+        }
     }
 }
 
