@@ -9,6 +9,8 @@ var difficulty = 0;
 var gameStarted = false;
 var initTarget = [];
 var time = 0;
+var remainingMines = mineSize[difficulty];
+var remainingCells = colSize[difficulty] * rowSize[difficulty];
 
 // 2차원 배열 생성 및 초기화
 var mines = [];
@@ -52,25 +54,17 @@ const timer = setInterval(() => {
 
 // 지뢰 생성
 const generateMine = (initCol, initRow) => {
-
-    const initArea = [];
-    for(i = initCol - 1; i < initCol + 2; i++) {
-        for(j = initRow - 1; j < initRow + 2; j++) {
-            if (i >= 0 && i < colSize[difficulty]) {
-                if (j >= 0 && j < rowSize[difficulty]) {
-                    initArea.push([i, j]);
-                }
-            }
-        }
-    }
-
     for(i=0; i < mineSize[difficulty]; i++) {
-        const newcol=Math.floor(Math.random() * colSize[difficulty]);
-        const newrow=Math.floor(Math.random() * rowSize[difficulty]);
+        let newcol=Math.floor(Math.random() * (colSize[difficulty] - 3));
+        let newrow=Math.floor(Math.random() * (rowSize[difficulty] - 3));
+
+        // [initCol - 1, initRow - 1] 혹은 이보다 우하단에 좌표가 생성되면 +3 해주기
+        if (newcol >= initCol - 1)
+            newcol += 3;
+        if (newrow >= initRow - 1)
+            newrow += 3;
         
-        if (mines[newcol][newrow] === true)
-            i--;
-        else if (initCol === newcol && initRow === newrow)
+        if (mines[newcol][newrow] === true) // 이미 생성된 좌표 
             i--;
         else {
             mines[newcol][newrow] = true;
@@ -108,11 +102,14 @@ const reveal = (target, col, row) => {
     // 이미 열려있지 않고 깃발 꽂히지 않은 칸만 열림
     if (target.classList.contains('revealed') === false && flagged[col][row] === false) {
         target.classList.add('revealed');
+        remainingCells--;
+
         if (mines[col][row] === true) {
             // 지뢰 칸을 엶
             target.style.backgroundImage = 'url("./src/bomb-solid.svg")'
             target.style.backgroundRepeat = 'no-repeat';
-
+            setRemainingMines(false);
+            gameOver(false);
         } else if (revealed[col][row] !== true && flagged[col][row] === false) {
             // 정상적으로 열림
             let nearbomb = 0;
@@ -218,7 +215,35 @@ const reveal = (target, col, row) => {
 // 지뢰 칸 깃발
 const flag = (target, col, row) => {
     flagged[col][row] = !flagged[col][row];
-    target.classList.toggle('flagged')
+    target.classList.toggle('flagged');
+    flagged[col][row] ? setRemainingMines(false) : setRemainingMines(true);
+}
+
+const setRemainingMines = (TrueisPlus) => {
+    remainingMines += TrueisPlus ? 1 : -1;
+    document.getElementById('remaining').innerText = remainingMines;
+}
+
+// 게임 오버
+const gameOver = (clear) => {
+    // 승리
+    if (clear) {
+
+    } else { // 패배
+        clearInterval(timer);
+        setTimeout(() => {
+            for(let i = 0; i < colSize[difficulty]; i++) {
+                for(let j = 0; j < rowSize[difficulty]; j++) {
+                    const target = document.getElementById('tablebody').childNodes[i].childNodes[j];
+                    if (!revealed[i][j]) {
+                        target.style.transition = 'background-color ease 1s';
+                        target.style.backgroundColor = '#ddd';
+                    }
+                    reveal(target, i, j);
+                }
+            }
+        }, 1500);
+    }
 }
 
 // 9*9 버튼(버튼대신 td) 생성
