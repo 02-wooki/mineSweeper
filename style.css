@@ -26,11 +26,8 @@ header > div > div {
 }
 
 .appContainer {
-    height: 500px;      width: 500px;
     padding: 10px;
-    
     background-color: #eee;
-
     border-radius: 20px;
 }
 td {
@@ -40,8 +37,6 @@ td {
 
     background-color: #ddd;
 
-    flex-grow: 1;
-
     cursor: pointer;
 }
 td:active:not(.revealed) {
@@ -49,11 +44,17 @@ td:active:not(.revealed) {
 }
 
 .revealed {
-    border: none;
+    border: 2px solid #ddd;
     background-color: #eee;
     cursor: default;
 
-    flex-grow: 1;
+    flex-grow: 1
+}
+.flagged {
+    background-image: url('./src/flag-solid.svg');
+    background-size: 60%;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 .mainthemeColor {
