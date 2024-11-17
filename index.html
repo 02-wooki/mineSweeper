@@ -8,7 +8,7 @@
 
     <link rel="shortcut icon" href="./src/bomb-solid.svg">
     <script src="https://kit.fontawesome.com/127f1187f0.js" crossorigin="anonymous"></script>
-<body>
+<body onload="init()">
     <header>
         <div>
             <div id="remaining" class="mainthemeColor mainfont">10</div>
@@ -22,7 +22,15 @@
     <table class="appContainer">
         <tbody id="tablebody"></tbody>
     </table>
-
+    <section>
+        <div class="buttonContainer">
+            <button class="main">Retry</button>
+            <button class="sub" onclick="">Change Difficulty</button>
+        </div>
+    </section>
+    <div id="modalBack">
+        <div id="modal"></div>
+    </div>
     <script src="game.js"></script>
 </body>
 </html>

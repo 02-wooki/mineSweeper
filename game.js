@@ -11,33 +11,12 @@ var initTarget = [];
 var time = 0;
 var remainingMines = mineSize[difficulty];
 var remainingCells = colSize[difficulty] * rowSize[difficulty];
+var modalbuttons = [];
 
-// 2차원 배열 생성 및 초기화
+// 2차원 배열 생성
 var mines = [];
 var revealed = [];
 var flagged = [];
-
-for(i=0; i < rowSize[difficulty]; i++) {
-    var aRow = [];
-    for(j=0; j < colSize[difficulty]; j++) {
-        aRow.push(false);
-    }
-    mines.push(aRow);
-}
-for(i=0; i < rowSize[difficulty]; i++) {
-    var aRow = [];
-    for(j=0; j < colSize[difficulty]; j++) {
-        aRow.push(false);
-    }
-    revealed.push(aRow);
-}
-for(i=0; i < rowSize[difficulty]; i++) {
-    var aRow = [];
-    for(j=0; j < colSize[difficulty]; j++) {
-        aRow.push(false);
-    }
-    flagged.push(aRow);
-}
 
 // 브라우저 자체 우클릭 비활성화
 window.oncontextmenu=function() {
@@ -51,6 +30,142 @@ const timer = setInterval(() => {
         document.getElementById('time').innerText = time;
     }
 }, 1000);
+
+// 시작 화면
+const init = () => {
+    chooseDifficulty();
+    gameInit();
+}
+
+const gameInit = () => {
+    for(i=0; i < rowSize[difficulty]; i++) {
+        var aRow = [];
+        for(j=0; j < colSize[difficulty]; j++) {
+            aRow.push(false);
+        }
+        mines.push(aRow);
+    }
+    for(i=0; i < rowSize[difficulty]; i++) {
+        var aRow = [];
+        for(j=0; j < colSize[difficulty]; j++) {
+            aRow.push(false);
+        }
+        revealed.push(aRow);
+    }
+    for(i=0; i < rowSize[difficulty]; i++) {
+        var aRow = [];
+        for(j=0; j < colSize[difficulty]; j++) {
+            aRow.push(false);
+        }
+        flagged.push(aRow);
+    }
+
+    // 9*9 버튼(버튼대신 td) 생성
+    const appcont = document.getElementsByClassName("appContainer")[0];
+    if (difficulty == 0) {
+        appcont.style.width = '500px';
+        appcont.style.height = '500px';
+    } else if (difficulty == 1) {
+        appcont.style.width = '770px';
+        appcont.style.height = '770px';
+    }
+
+    for(i=0; i < rowSize[difficulty]; i++) {
+        const tr=document.createElement('tr');
+        for(j=0; j < colSize[difficulty]; j++) {
+            const td=document.createElement('td');
+            td.style.width = `47px`
+            td.style.height = `47px`
+            td.style.padding = '0px'
+            td.addEventListener('click', clickEvendHandler)
+            tr.appendChild(td);
+        }
+        gameTbody.appendChild(tr);
+    }
+}
+
+const chooseDifficulty = () => {
+    const div = document.getElementById('modal');
+
+    const h = document.createElement('h2');
+    h.innerText = 'Choose Difficulty';
+
+    const diffContainer = document.createElement('div');
+    const easy = document.createElement('button');
+    const normal = document.createElement('button');
+    const hard = document.createElement('button');
+
+    diffbuttonText = ['easy', 'normal', 'hard'];
+    for (let i = 0; i < 3; i++) {
+        const diffbutton = document.createElement('button');
+        diffbutton.style.marginBottom = '3px';
+        diffbutton.innerText = diffbuttonText[i];
+        diffbutton.classList.add('sub');
+        diffbutton.style.fontWeight = '600';
+        diffbutton.style.fontSize = '1.1rem';
+        diffbutton.addEventListener('click', function () {diffClickHandler(this)});
+        diffContainer.append(diffbutton);
+        modalbuttons.push(diffbutton);
+    }
+    
+    diffContainer.style.display = 'flex';
+    diffContainer.style.flexDirection = 'column';
+
+    const button = document.createElement('button');
+    button.classList.add('main');
+    button.innerText = 'Play !';
+    button.addEventListener('click', function () {diffClickHandler(this)});
+
+    div.append(h);
+    div.append(diffContainer);
+    div.append(button);
+}
+
+const diffClickHandler = (target) => {
+    if (target.innerText === 'easy')
+        difficulty = 0;
+    else if (target.innerText === 'normal')
+        difficulty = 1;
+    else if (target.innerText === 'hard')
+        difficulty = 2;
+    else
+        modalClose();
+
+    for (let i of modalbuttons) {
+        i.style.backgroundColor = '#eee';
+        i.style.color = '#bd9377';
+    }
+    target.style.backgroundColor = '#bd9377';
+    target.style.color = '#eee';
+}
+
+const modalClose = () => {
+    const modal = document.getElementById('modalBack');
+    modal.innerHTML = '';
+    modal.id = '';
+
+    for(i=0; i < rowSize[difficulty]; i++) {
+        var aRow = [];
+        for(j=0; j < colSize[difficulty]; j++) {
+            aRow.push(false);
+        }
+        mines.push(aRow);
+    }
+    for(i=0; i < rowSize[difficulty]; i++) {
+        var aRow = [];
+        for(j=0; j < colSize[difficulty]; j++) {
+            aRow.push(false);
+        }
+        revealed.push(aRow);
+    }
+    for(i=0; i < rowSize[difficulty]; i++) {
+        var aRow = [];
+        for(j=0; j < colSize[difficulty]; j++) {
+            aRow.push(false);
+        }
+        flagged.push(aRow);
+    }
+}
 
 // 지뢰 생성
 const generateMine = (initCol, initRow) => {
@@ -226,6 +341,9 @@ const setRemainingMines = (TrueisPlus) => {
 
 // 게임 오버
 const gameOver = (clear) => {
+
+    const sect = document.getElementsByTagName('section')[0];
+
     // 승리
     if (clear) {
 
@@ -242,25 +360,9 @@ const gameOver = (clear) => {
                     reveal(target, i, j);
                 }
             }
+            sect.style.visibility = 'visible';
+            sect.style.opacity = '100%';
         }, 1500);
     }
 }
 
-// 9*9 버튼(버튼대신 td) 생성
-const appcont = document.getElementsByClassName("appContainer")[0];
-if (difficulty == 0)
-    appcont.style.width = '500px';
-    appcont.style.height = '500px';
-
-for(i=0; i < rowSize[difficulty]; i++) {
-    const tr=document.createElement('tr');
-    for(j=0; j < colSize[difficulty]; j++) {
-        const td=document.createElement('td');
-        td.style.width = `47px`
-        td.style.height = `47px`
-        td.style.padding = '0px'
-        td.addEventListener('mousedown', clickEvendHandler)
-        tr.appendChild(td);
-    }
-    gameTbody.appendChild(tr);
-}
