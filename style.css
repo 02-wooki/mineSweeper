@@ -105,6 +105,10 @@ button.sub:active {
     font-weight: bold;
     font-size: 2rem;
 }
+.subfont {
+    font-weight: 600;
+    font-size: 1.05rem;
+}
 
 #modal {
     width: 400px;   height: 500px;

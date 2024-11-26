@@ -24,12 +24,14 @@ window.oncontextmenu=function() {
 }
 
 // 타이머
-const timer = setInterval(() => {
+let timer;
+
+const timerFunc = () => {
     if (gameStarted) {
         time++;
         document.getElementById('time').innerText = time;
     }
-}, 1000);
+}
 
 // 시작 화면
 const init = () => {
@@ -38,6 +40,23 @@ const init = () => {
 }
 
 const gameInit = () => {
+
+    // 변수 초기화
+    mines = [];
+    revealed = [];
+    flagged = [];
+    gameStarted = false;
+    remainingCells = colSize[difficulty] * rowSize[difficulty];
+    
+    time = 0;
+    document.getElementById('time').innerText = time;
+    remainingMines = mineSize[difficulty];
+
+    // Retry, chooseDifficulty 버튼 비활성화
+    const sect = document.getElementsByTagName('section')[0];
+    sect.style.visibility = 'hidden';
+    sect.style.opacity = '0%';
+
     for(i=0; i < rowSize[difficulty]; i++) {
         var aRow = [];
         for(j=0; j < colSize[difficulty]; j++) {
@@ -61,6 +80,7 @@ const gameInit = () => {
     }
 
     // 9*9 버튼(버튼대신 td) 생성
+    gameTbody.innerHTML = '';
     const appcont = document.getElementsByClassName("appContainer")[0];
     if (difficulty == 0) {
         appcont.style.width = '500px';
@@ -77,7 +97,7 @@ const gameInit = () => {
             td.style.width = `47px`
             td.style.height = `47px`
             td.style.padding = '0px'
-            td.addEventListener('click', clickEvendHandler)
+            td.addEventListener('mouseup', clickEvendHandler)
             tr.appendChild(td);
         }
         gameTbody.appendChild(tr);
@@ -142,7 +162,7 @@ const diffClickHandler = (target) => {
 const modalClose = () => {
     const modal = document.getElementById('modalBack');
     modal.innerHTML = '';
-    modal.id = '';
+    modal.style.zIndex = -1;
 
     for(i=0; i < rowSize[difficulty]; i++) {
         var aRow = [];
@@ -202,10 +222,16 @@ const clickEvendHandler = (target) => {
         // 첫 클릭시 지뢰 생성
         if(gameStarted === false) {
             gameStarted = true;
-            timer;
+            timer = setInterval(() => {
+                timerFunc();
+            }, 1000);
             generateMine(col, row);
         }
         reveal(target.target, col, row);
+        // 승리조건 검사
+        if (remainingCells === mineSize[difficulty]) {
+            gameOver(true);
+        }
     } else if ((target.button === 2) || (target.which === 3)) {
         // 우클릭
         flag(target.target, col, row);
@@ -346,9 +372,56 @@ const gameOver = (clear) => {
 
     // 승리
     if (clear) {
+        clearInterval(timer);
 
+        const modalback = document.getElementById('modalBack');
+        const modal = document.createElement('div');
+        modal.setAttribute('id', 'modal');
+
+        modalback.style.zIndex = 1;
+        modal.style.width = '500px';
+        modal.style.height = '400px';
+        modal.innerHTML = '';
+
+        const winText = document.createElement('h2');
+        winText.innerText = 'Game Clear!'
+        modal.append(winText);
+        
+        // 쿠키에서 최고 기록 찾기
+        let high;
+        if (document.cookie.length !== 0) {
+            let cookie = document.cookie.split(';');
+            for (let i of cookie) {
+                let unit = i.trim().split('=');
+                if (unit[0].trim() === String(difficulty))
+                    high = unit[1].trim();
+            }
+        }
+
+        // 최고 기록을 경신했을 때
+        if (high > time || !high) {
+            document.cookie = `${difficulty}=${time};`;
+            const newHigh = document.createElement('div');
+            newHigh.innerText = `최고 기록 달성! ${time}`;
+            newHigh.classList.add('mainfont');
+            newHigh.classList.add('mainthemeColor');
+            modal.append(newHigh);
+        }
+        else {
+            const myTime = document.createElement('div');
+            const oldHigh = document.createElement('div');
+            myTime.innerText = `내 기록: ${time}`;
+            oldHigh.innerText = `최고 기록: ${high}`;
+            myTime.classList.add('mainfont');
+            myTime.classList.add('mainthemeColor');
+            oldHigh.classList.add('subfont');
+            modal.append(myTime);
+            modal.append(oldHigh);
+        }
+        modalback.append(modal);
     } else { // 패배
         clearInterval(timer);
+        gameStarted = false;
         setTimeout(() => {
             for(let i = 0; i < colSize[difficulty]; i++) {
                 for(let j = 0; j < rowSize[difficulty]; j++) {
